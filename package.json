@@ -1,13 +1,15 @@
 {
-  "name": "tiktok",
+  "name": "Tiktok",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://tinphamars.github.io/Covid-19-tracker-with-reactjs/",
   "dependencies": {
     "@testing-library/jest-dom": "^5.15.0",
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
     "chart.js": "^3.6.0",
     "chartjs-adapter-moment": "^1.0.0",
+    "gh-pages": "^3.2.3",
     "google-map-react": "^2.1.10",
     "moment": "^2.29.1",
     "react": "^17.0.2",
@@ -20,7 +22,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [
