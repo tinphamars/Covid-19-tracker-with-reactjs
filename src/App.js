@@ -1,64 +1,10 @@
 import { useEffect, useState, useRef } from 'react';
 import CountriesJson from './countries';
 import './App.css';
-import { Bar } from 'react-chartjs-2';
 import GoogleMap from 'google-map-react';
-import {
-	Chart as ChartJS,
-	CategoryScale,
-	LinearScale,
-	PointElement,
-	LineElement,
-	Title,
-	Tooltip,
-	Legend,
-	TimeScale,
-	TimeSeriesScale, BarElement
-} from 'chart.js';
-import 'chartjs-adapter-moment';
-
-
-const AnyReactComponent = ({ padding, item }) => (
-	<div className="popup_div" style={{
-		padding: padding,
-	}}>
-		<div className="popup_text" id={item.CountryCode}>
-			<h5>{item.Country}</h5>
-			<ul className="list-group">
-				<li className="list-group-item d-flex justify-content-between align-items-center">
-					TotalConfirmed
-					<span className="badge text-danger badge-pill">{item.TotalConfirmed}</span>
-				</li>
-				<li className="list-group-item d-flex justify-content-between align-items-center">
-					TotalDeaths
-					<span className="badge text-info badge-pill">{item.TotalDeaths}</span>
-				</li>
-				<li className="list-group-item d-flex justify-content-between align-items-center">
-					NewConfirmed
-					<span className="badge text-danger badge-pill">{item.NewConfirmed}</span>
-				</li>
-				<li className="list-group-item d-flex justify-content-between align-items-center">
-					NewDeaths
-					<span className="badge text-info badge-pill">{item.NewDeaths}</span>
-				</li>
-			</ul>
-		</div>
-	</div >
-);
-
-ChartJS.register(
-	CategoryScale,
-	LinearScale,
-	PointElement,
-	LineElement,
-	Title,
-	Tooltip,
-	Legend,
-	TimeScale,
-	TimeSeriesScale,
-	BarElement
-);
-
+import Sidebar from './component/SidebarItem';
+import MapItem from './component/MapItem'
+import Tracker from './component/Tracker'
 
 function App() {
 
@@ -244,80 +190,28 @@ function App() {
 		setActiveBt(date)
 	}
 
-	const options = {
-		responsive: true,
-		legend: {
-			position: 'top',
-		},
-		scales: {
-			y: {
-				beginAtZero: true,
-				max: dataMap[3],
-				min: 0
-			},
-			x: {
-				type: 'time',
-			}
-		},
+	const sidebars = [];
+	const mapItems = [];
 
-		plugins: {
-			title: {
-				display: false,
-				text: 'Chart.js Line Chart',
-			},
-		},
-	};
-
-	const labels = dataMap[1]
-	const datas = dataMap[0]
-	const data_demo = {
-		labels,
-		datasets: [
-			{
-				label: 'Confirmed',
-				data: datas,
-				radius: 0,
-				backgroundColor: 'red',
-			},
-		],
-	};
-
-	const modelChart = () => {
-		return (
-			<div id="exampleModalLive" className="modal fade show "
-				aria-labelledby="exampleModalLiveLabel"
-				style={{ display: 'block', paddingLeft: '17px', paddingRight: '17px', background: 'rgb(0 0 0 / 77%)', width: '100%' }}>
-				<div className="modal-dialog-centered"
-					style={{ width: '100%' }}
-					role="document">
-					<div className="modal-content">
-
-						<button type="button"
-							onClick={handleClose}
-							style={{
-								position: 'absolute',
-								right: '0px',
-								top: '-39px',
-								borderRadius: '50%',
-							}}
-							className="btn btn-danger fw-bold text-white">
-							<span aria-hidden="true">×</span>
-						</button>
-
-						<div className="list-button-last-day">
-							<button type="button" disabled={activeBt === 30 ? true : false} onClick={() => handleDays(30)} className="btn btn-dark text-white">Last 30 days</button>
-							<button type="button" disabled={activeBt === 60 ? true : false} onClick={() => handleDays(60)} className="btn btn-dark text-white">Last 60 days</button>
-							<button type="button" disabled={activeBt === 1 ? true : false} onClick={() => handleDays(1)} className="btn btn-dark text-white">All time</button>
-						</div>
-
-						<div className="modal-body" style={{ maxHeight: '70vh' }}>
-							<Bar style={{ maxHeight: '55vh' }} options={options} data={data_demo} />
-						</div>
-					</div>
-				</div>
-			</div >
+	data.map((item) => {
+		sidebars.push(
+			<Sidebar key={item.CountryCode}
+				item={item}
+				active={active}
+				inputRef={el => refs.current[item.CountryCode] = el}
+				callSet={() => handleCenter(item)} />
 		);
-	}
+
+		mapItems.push(
+			<MapItem
+				key={item.CountryCode}
+				lat={CountriesJson.filter(obj => obj.code === item.CountryCode).length === 1 && CountriesJson.filter(obj => obj.code === item.CountryCode)[0].lat}
+				lng={CountriesJson.filter(obj => obj.code === item.CountryCode).length === 1 && CountriesJson.filter(obj => obj.code === item.CountryCode)[0].lng}
+				padding={percent(item.TotalConfirmed)}
+				item={item}
+			/>
+		)
+	})
 
 	return (
 		<div className="main-css">
@@ -326,42 +220,31 @@ function App() {
 					<span className="fs-5 fw-semibold">Covit-19 Tracker</span>
 				</a>
 				<div className="list-group list-group-flush border-bottom scrollarea">
-					{data.map((item) =>
-						<a key={item.CountryCode} ref={el => refs.current[item.CountryCode] = el} onClick={() => handleCenter(item)} href="#" className={(item.CountryCode === active ? "active" : "") + " list-group-item list-group-item-action py-3 lh-tight"}>
-							<div className="d-flex w-100 align-items-center justify-content-between">
-								<strong className="fw-normal">{item.Country}</strong>
-								<small className="fst-italic" >{item.TotalConfirmed}</small>
-							</div>
-						</a>
-					)}
+					{sidebars}
 				</div>
 			</div>
 
 			<div className="div-map">
 				<div className="css-map">
 					<GoogleMap
-						bootstrapURLKeys={{ key: '' }}
+						bootstrapURLKeys={{ key: 'AIzaSyBAg58OATrf0C69i0m0aDPMhrNPIh3jwO8' }}
 						center={mapCenter.center}
 						zoom={mapCenter.zoom}
 						onChildClick={handleChildClick}
 						onChildMouseEnter={onChildMouseEnter}
 						onChildMouseLeave={onChildMouseLeave}
 					>
-						{data && data.map((item, index) =>
-							<AnyReactComponent
-								key={index}
-								lat={CountriesJson.filter(obj => obj.code === item.CountryCode).length === 1 && CountriesJson.filter(obj => obj.code === item.CountryCode)[0].lat}
-								lng={CountriesJson.filter(obj => obj.code === item.CountryCode).length === 1 && CountriesJson.filter(obj => obj.code === item.CountryCode)[0].lng}
-								padding={percent(item.TotalConfirmed)}
-								item={item}
-							/>
-						)}
+						{mapItems}
 					</GoogleMap>
 				</div>
 			</div>
 
-			{popup && modelChart()}
-
+			{
+				popup && <Tracker dataMap={dataMap}
+					handleClose={handleClose}
+					activeBt={activeBt}
+					handleDays={handleDays} />
+			}
 		</div >
 	);
 }
