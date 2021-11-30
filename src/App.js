@@ -227,7 +227,7 @@ function App() {
 			<div className="div-map">
 				<div className="css-map">
 					<GoogleMap
-						bootstrapURLKeys={{ key: 'AIzaSyBAg58OATrf0C69i0m0aDPMhrNPIh3jwO8' }}
+						bootstrapURLKeys={{ key: '' }}
 						center={mapCenter.center}
 						zoom={mapCenter.zoom}
 						onChildClick={handleChildClick}
